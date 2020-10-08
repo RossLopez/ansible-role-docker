@@ -1,5 +1,6 @@
 galaxy_info:
   author: Ross Lopez
+  role_name: docker_ubuntu
   description: Ansible role that installs Docker and Docker Compose on Ubuntu
   license: MIT
   min_ansible_version: 2.1
