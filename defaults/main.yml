@@ -1,0 +1,10 @@
+---
+# Ubuntu
+
+# Used only for Ubuntu. Switch 'stable' to 'edge' if desired.
+docker_release_channel: stable
+apt_key_url: https://download.docker.com/linux/ubuntu/gpg
+apt_repository: deb https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} {{ docker_release_channel }}
+
+# A list of users who will be added to the docker group.
+docker_users: []

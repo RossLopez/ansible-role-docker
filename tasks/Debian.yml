@@ -1,0 +1,22 @@
+---
+- name: install docker dependencies
+  apt:
+    name: 
+      - apt-transport-https
+      - ca-certificates 
+      - software-properties-common
+    state: latest
+    update_cache: yes
+
+- name: add docker repository key
+  apt_key:
+    url: "{{ apt_key_url }}"
+    state: present
+  register: add_repository_key
+  ignore_errors: true
+
+- name: add docker repository 
+  apt_repository:
+    repo: "{{ apt_repository }}"
+    update_cache: yes
+    state: present

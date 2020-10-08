@@ -1,0 +1,23 @@
+---
+- include_tasks: Debian.yml
+  when: ansible_os_family == 'Debian'
+
+- name: install docker 
+  package:
+    name: 
+      - docker-ce
+      - docker-compose 
+      - software-properties-common
+    state: latest
+    update_cache: yes
+  notify:
+    - systemd daemon-reload
+    - restart docker service
+
+- name: start docker
+  service:
+    name: docker
+    state: started
+
+- include_tasks: docker-users.yml
+  when: docker_users | length > 0

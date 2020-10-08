@@ -1,0 +1,16 @@
+galaxy_info:
+  author: Ross Lopez
+  description: Ansible role that installs Docker and Docker Compose on Ubuntu
+  license: MIT
+  min_ansible_version: 2.1
+
+  platforms:
+   - name: Ubuntu
+     versions:
+     - all
+  galaxy_tags:
+    - docker
+    - ubuntu
+    - compose
+
+dependencies: []
