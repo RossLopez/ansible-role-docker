@@ -15,8 +15,8 @@ You can switch the channel to `edge` if you want to use the Edge release.
 Docker Users
 
     docker_users:
-      - Dustin
-      - Steve
+      - dustin
+      - steve
 
 A list of system users to be added to the `docker` group
 
