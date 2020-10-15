@@ -1,9 +1,9 @@
 ---
 - name: install docker dependencies
   apt:
-    name: 
+    name:
       - apt-transport-https
-      - ca-certificates 
+      - ca-certificates
       - software-properties-common
     state: latest
     update_cache: yes
@@ -15,7 +15,7 @@
   register: add_repository_key
   ignore_errors: true
 
-- name: add docker repository 
+- name: add docker repository
   apt_repository:
     repo: "{{ apt_repository }}"
     update_cache: yes

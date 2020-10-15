@@ -2,11 +2,11 @@
 - include_tasks: Debian.yml
   when: ansible_os_family == 'Debian'
 
-- name: install docker 
-  package:
-    name: 
+- name: install docker
+  apt:
+    name:
       - docker-ce
-      - docker-compose 
+      - docker-compose
       - software-properties-common
     state: latest
     update_cache: yes

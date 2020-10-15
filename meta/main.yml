@@ -1,3 +1,4 @@
+---
 galaxy_info:
   author: Ross Lopez
   role_name: docker_ubuntu
@@ -6,9 +7,9 @@ galaxy_info:
   min_ansible_version: 2.1
 
   platforms:
-   - name: Ubuntu
-     versions:
-     - all
+    - name: Ubuntu
+      versions:
+        - all
   galaxy_tags:
     - docker
     - ubuntu

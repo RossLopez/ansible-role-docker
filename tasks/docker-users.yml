@@ -1,4 +1,3 @@
-
 ---
 - name: Add docker users to the docker group.
   user:
