@@ -6,7 +6,6 @@ name: CI
       - master
 
 jobs:
-
   test:
     name: Molecule
     runs-on: ubuntu-latest
