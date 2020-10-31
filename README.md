@@ -1,4 +1,5 @@
 # ansible-docker
+[![](https://github.com/rosslopez/ansible-role-docker/workflows/Molecule%20Test/badge.svg)](https://github.com/rosslopez/ansible-role-docker/actions)
 Ansible role that installs [Docker](https://www.docker.com) and Docker Compose on Ubuntu 
 ## Requirements
 
