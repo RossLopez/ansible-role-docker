@@ -3,6 +3,10 @@
 
 extends: default
 
+ignore: |
+  .venv/
+  .github/
+
 rules:
   line-length:
     max: 120

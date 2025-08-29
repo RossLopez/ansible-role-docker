@@ -1,0 +1,59 @@
+# Molecule managed
+
+{% if item.registry is defined %}
+FROM {{ item.registry.url }}/{{ item.image }}
+{% else %}
+FROM {{ item.image }}
+{% endif %}
+
+{% if item.env is defined %}
+{% for var, value in item.env.items() %}
+{% if value %}
+ENV {{ var }} {{ value }}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+RUN \
+  if [ $(command -v apt-get) ]; then \
+    export DEBIAN_FRONTEND=noninteractive && \
+    apt-get update && \
+    apt-get install -y python3 python3-pip sudo bash ca-certificates systemd systemd-sysv && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*; \
+  elif [ $(command -v dnf) ]; then \
+    dnf makecache && \
+    dnf --assumeyes install python3 python3-pip sudo bash ca-certificates systemd && \
+    dnf clean all; \
+  elif [ $(command -v yum) ]; then \
+    yum makecache fast && \
+    yum install -y python3 python3-pip sudo bash ca-certificates systemd && \
+    yum clean all; \
+  elif [ $(command -v zypper) ]; then \
+    zypper refresh && \
+    zypper install -y python3 python3-pip sudo bash ca-certificates systemd && \
+    zypper clean -a; \
+  elif [ $(command -v apk) ]; then \
+    apk update && \
+    apk add --no-cache python3 py3-pip sudo bash ca-certificates openrc && \
+    ln -sf python3 /usr/bin/python && \
+    python3 -m ensurepip; \
+  elif [ $(command -v xbps-install) ]; then \
+    xbps-install -Syu && \
+    xbps-install -y python3 python3-pip sudo bash ca-certificates && \
+    xbps-remove -O; \
+  fi
+
+# Create ansible user for testing
+RUN groupadd -r ansible && useradd -m -g ansible -s /bin/bash ansible && \
+    echo 'ansible ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+
+# Create testuser for Docker group testing
+RUN useradd -m -s /bin/bash testuser && \
+    echo 'testuser ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+
+# Configure systemd
+RUN systemctl set-default multi-user.target
+
+VOLUME ["/sys/fs/cgroup"]
+CMD ["/usr/lib/systemd/systemd"]

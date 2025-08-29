@@ -39,19 +39,14 @@ jobs:
     strategy:
       matrix:
         distro:
-          - ubuntu2004
-          - ubuntu2204
-          - debian11
-          - debian12
-          - centos8
-          - rockylinux9
+          - quay.io/ansible/test-runner:ubuntu2204
+          - quay.io/ansible/test-runner:ubuntu2004
+          - quay.io/ansible/test-runner:debian12
       fail-fast: false
     name: Molecule (${{ matrix.distro }})
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          path: "${{ github.repository }}"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -60,14 +55,21 @@ jobs:
 
       - name: Install test dependencies
         run: |
-          pip install molecule[docker] pytest-testinfra
-          ansible-galaxy collection install community.docker
-          ansible-galaxy collection install community.general
-          ansible-galaxy collection install ansible.posix
+          pip install --upgrade pip
+          pip install molecule pytest-testinfra ansible-core
+          pip install molecule-plugins[docker]
+          pip install docker requests urllib3
+          ansible-galaxy collection install community.docker --force
+          ansible-galaxy collection install community.general --force
+          ansible-galaxy collection install ansible.posix --force
+
+      - name: Verify molecule drivers
+        run: |
+          molecule drivers
+          docker --version
 
       - name: Run Molecule tests
         run: molecule test
-        working-directory: "${{ github.repository }}"
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'

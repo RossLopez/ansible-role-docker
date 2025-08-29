@@ -61,19 +61,32 @@
         success_msg: "Docker can successfully run containers"
 
     - name: Check if test user exists (if configured)
-      ansible.builtin.user:
-        name: testuser
-      register: test_user
+      ansible.builtin.getent:
+        database: passwd
+        key: testuser
+      register: test_user_info
+      failed_when: false
       when: "'testuser' in (docker_users | default([]))"
+
+    - name: Get user groups for testuser
+      ansible.builtin.command: groups testuser
+      register: test_user_groups
+      changed_when: false
+      failed_when: false
+      when: 
+        - test_user_info is defined
+        - test_user_info.ansible_facts is defined
+        - "'testuser' in (docker_users | default([]))"
 
     - name: Verify test user is in docker group
       ansible.builtin.assert:
         that:
-          - "'docker' in test_user.groups"
-        fail_msg: "Test user is not in docker group"
-        success_msg: "Test user is properly configured"
+          - "'docker' in test_user_groups.stdout"
+        fail_msg: "Test user is not in docker group: {{ test_user_groups.stdout }}"
+        success_msg: "Test user is properly configured in docker group"
       when: 
-        - test_user is defined
+        - test_user_groups is defined
+        - test_user_groups.stdout is defined
         - "'testuser' in (docker_users | default([]))"
 
     - name: Test Docker info command
