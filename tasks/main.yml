@@ -1,24 +1,118 @@
 ---
-- include_tasks: Debian.yml
-  when: ansible_os_family == 'Debian'
+# Main tasks for Docker installation
 
-- name: install docker
-  apt:
-    name:
-      - docker-ce
-      - docker-compose
-      - software-properties-common
-    state: latest
-    update_cache: yes
-    cache_valid_time: 3600
+- name: Set OS family specific variables
+  ansible.builtin.set_fact:
+    _docker_repo_url: >-
+      {{
+        _docker_repo_url_debian if ansible_os_family == 'Debian'
+        else _docker_repo_url_redhat if ansible_os_family == 'RedHat'
+        else docker_repo_url
+      }}
+    _docker_gpg_key_url: >-
+      {{
+        _docker_gpg_key_url_debian if ansible_os_family == 'Debian'
+        else _docker_gpg_key_url_redhat if ansible_os_family == 'RedHat'
+        else docker_gpg_key_url
+      }}
+    _docker_gpg_key_id: >-
+      {{
+        _docker_gpg_key_id_debian if ansible_os_family == 'Debian'
+        else _docker_gpg_key_id_redhat if ansible_os_family == 'RedHat'
+        else docker_gpg_key_id
+      }}
+    _docker_packages: >-
+      {{
+        _docker_packages_debian if ansible_os_family == 'Debian'
+        else _docker_packages_redhat if ansible_os_family == 'RedHat'
+        else []
+      }}
+
+- name: Validate supported operating system
+  ansible.builtin.fail:
+    msg: "This role currently supports Debian, Ubuntu, and RedHat-based distributions only."
+  when: ansible_os_family not in ['Debian', 'RedHat']
+
+- name: Check if Docker is already installed
+  ansible.builtin.command: docker --version
+  register: _docker_installed
+  failed_when: false
+  changed_when: false
+
+- name: Include OS family specific tasks
+  ansible.builtin.include_tasks: "{{ ansible_os_family | lower }}.yml"
+
+- name: Install Docker packages
+  ansible.builtin.package:
+    name: "{{ _docker_packages }}"
+    state: "{{ docker_package_state }}"
   notify:
-    - systemd daemon-reload
-    - restart docker service
+    - restart docker
 
-- name: start docker
-  service:
-    name: docker
-    state: started
+- name: Install Docker Compose plugin
+  ansible.builtin.package:
+    name: "{{ _docker_compose_package_debian if ansible_os_family == 'Debian' else _docker_compose_package_redhat }}"
+    state: "{{ docker_package_state }}"
+  when: docker_compose_install_method == 'plugin'
 
-- include_tasks: docker-users.yml
+- name: Install Docker Compose standalone
+  ansible.builtin.include_tasks: install-compose-standalone.yml
+  when: docker_compose_install_method == 'standalone'
+
+- name: Create Docker configuration directory
+  ansible.builtin.file:
+    path: /etc/docker
+    state: directory
+    mode: '0755'
+
+- name: Configure Docker daemon
+  ansible.builtin.template:
+    src: daemon.json.j2
+    dest: "{{ _docker_daemon_config_file }}"
+    mode: '0644'
+    backup: true
+  when: docker_daemon_options | length > 0
+  notify:
+    - restart docker
+
+- name: Start and enable Docker service
+  ansible.builtin.systemd:
+    name: "{{ _docker_service_name }}"
+    state: "{{ docker_service_state }}"
+    enabled: "{{ docker_service_enabled }}"
+    daemon_reload: true
+
+- name: Add users to Docker group
+  ansible.builtin.include_tasks: docker-users.yml
   when: docker_users | length > 0
+
+- name: Verify Docker installation
+  ansible.builtin.command: docker --version
+  register: _docker_version_output
+  changed_when: false
+
+- name: Display Docker version
+  ansible.builtin.debug:
+    msg: "{{ _docker_version_output.stdout }}"
+
+- name: Verify Docker Compose installation (plugin)
+  ansible.builtin.command: docker compose version
+  register: _docker_compose_version_output
+  changed_when: false
+  when: docker_compose_install_method == 'plugin'
+
+- name: Verify Docker Compose installation (standalone)
+  ansible.builtin.command: docker-compose --version
+  register: _docker_compose_standalone_version_output
+  changed_when: false
+  when: docker_compose_install_method == 'standalone'
+
+- name: Display Docker Compose version
+  ansible.builtin.debug:
+    msg: >-
+      {{
+        _docker_compose_version_output.stdout if docker_compose_install_method == 'plugin'
+        else _docker_compose_standalone_version_output.stdout if docker_compose_install_method == 'standalone'
+        else 'Docker Compose not installed'
+      }}
+  when: docker_compose_install_method in ['plugin', 'standalone']

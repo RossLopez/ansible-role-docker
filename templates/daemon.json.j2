@@ -1,0 +1,7 @@
+{
+{% if docker_daemon_options %}
+{% for key, value in docker_daemon_options.items() %}
+  "{{ key }}": {{ value | to_nice_json }}{{ ',' if not loop.last else '' }}
+{% endfor %}
+{% endif %}
+}

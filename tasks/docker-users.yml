@@ -1,7 +1,23 @@
 ---
-- name: Add docker users to the docker group.
-  user:
+# Add users to docker group
+
+- name: Ensure docker group exists
+  ansible.builtin.group:
+    name: docker
+    state: present
+
+- name: Add users to the docker group
+  ansible.builtin.user:
     name: "{{ item }}"
     groups: docker
     append: true
-  with_items: "{{ docker_users }}"
+  loop: "{{ docker_users }}"
+  notify: warn about docker group
+
+- name: Display warning about Docker group privileges
+  ansible.builtin.debug:
+    msg: |
+      WARNING: Users added to the 'docker' group have root-equivalent privileges.
+      This is necessary for Docker to work but should be considered carefully for security.
+      Users: {{ docker_users | join(', ') }}
+  when: docker_users | length > 0

@@ -1,0 +1,50 @@
+---
+# RedHat/CentOS/Rocky/Alma Linux specific tasks for Docker installation
+
+- name: Install prerequisite packages
+  ansible.builtin.dnf:
+    name:
+      - dnf-plugins-core
+      - curl
+      - ca-certificates
+    state: present
+  when: ansible_pkg_mgr == 'dnf'
+
+- name: Install prerequisite packages (YUM)
+  ansible.builtin.yum:
+    name:
+      - yum-utils
+      - curl
+      - ca-certificates
+    state: present
+  when: ansible_pkg_mgr == 'yum'
+
+- name: Remove old Docker packages if present
+  ansible.builtin.package:
+    name:
+      - docker
+      - docker-client
+      - docker-client-latest
+      - docker-common
+      - docker-latest
+      - docker-latest-logrotate
+      - docker-logrotate
+      - docker-engine
+      - podman
+      - runc
+    state: absent
+  when: _docker_installed.rc != 0
+
+- name: Import Docker GPG key
+  ansible.builtin.rpm_key:
+    key: "{{ _docker_gpg_key_url }}"
+    state: present
+
+- name: Add Docker repository
+  ansible.builtin.yum_repository:
+    name: docker-ce-stable
+    description: "Docker CE Stable - {{ ansible_architecture }}"
+    baseurl: "{{ _docker_repo_url }}/{{ ansible_distribution_major_version }}/{{ ansible_architecture }}/stable"
+    gpgcheck: true
+    gpgkey: "{{ _docker_gpg_key_url }}"
+    enabled: true

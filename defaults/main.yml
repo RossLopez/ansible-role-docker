@@ -1,10 +1,57 @@
 ---
-# Ubuntu
+# Docker Installation Configuration
 
-# Used only for Ubuntu. Switch 'stable' to 'edge' if desired.
+# Docker release channel: stable, test
 docker_release_channel: stable
-apt_key_url: https://download.docker.com/linux/ubuntu/gpg
-apt_repository: deb https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} {{ docker_release_channel }}
 
-# A list of users who will be added to the docker group.
+# Docker version (use 'latest' for latest version, or specify version like '24.0.7')
+docker_version: latest
+
+# Docker Compose version (use 'latest' or specify version like '2.24.0')
+docker_compose_version: latest
+
+# Docker Compose installation method: 'plugin' (recommended) or 'standalone'
+docker_compose_install_method: plugin
+
+# Service configuration
+docker_service_state: started
+docker_service_enabled: true
+
+# A list of users who will be added to the docker group
 docker_users: []
+
+# Repository configuration - automatically determined based on OS
+docker_repo_url: ""  # Will be set automatically based on OS family
+docker_gpg_key_url: ""  # Will be set automatically based on OS family
+docker_gpg_key_id: ""   # Will be set automatically based on OS family
+
+# Package state: 'present' (recommended) or 'latest'
+# Using 'latest' can cause unexpected updates
+docker_package_state: present
+
+# Additional Docker daemon options (as a dictionary)
+docker_daemon_options: {}
+  # Example:
+  # log-driver: "json-file"
+  # log-opts:
+  #   max-size: "10m"
+  #   max-file: "3"
+
+# Configure Docker to start on boot
+docker_start_on_boot: true
+
+# Configure user namespace remapping (for enhanced security)
+docker_userns_remap: false
+docker_userns_remap_user: "dockremap"
+
+# Configure Docker to use different storage driver if needed
+docker_storage_driver: ""  # Leave empty for default
+
+# Configure Docker daemon to listen on TCP (for remote access)
+# WARNING: Only enable this in secure environments
+docker_tcp_listen: false
+docker_tcp_port: 2376
+docker_tls_enabled: false
+
+# Rootless Docker configuration
+docker_rootless: false

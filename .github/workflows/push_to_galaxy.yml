@@ -1,16 +1,93 @@
 ---
-name: Publish role to Ansible Galaxy
+name: Publish to Ansible Galaxy
+
 on:
-  - push
+  push:
+    tags:
+      - 'v*'
+  release:
+    types: [published]
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
+    name: Lint before publish
     steps:
-      - name: checkout
+      - name: Checkout
         uses: actions/checkout@v4
-      - name: galaxy
-        uses: robertdebock/galaxy-action@1.2.0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          galaxy_api_key: ${{ secrets.galaxy_api_key }}
-          git_branch: main
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install ansible-lint yamllint
+          ansible-galaxy collection install community.general
+          ansible-galaxy collection install ansible.posix
+
+      - name: Lint with ansible-lint
+        run: ansible-lint
+
+  test:
+    runs-on: ubuntu-latest
+    needs: lint
+    name: Quick test before publish
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: "${{ github.repository }}"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install test dependencies
+        run: |
+          pip install molecule[docker] pytest-testinfra
+          ansible-galaxy collection install community.docker
+          ansible-galaxy collection install community.general
+          ansible-galaxy collection install ansible.posix
+
+      - name: Run quick Molecule test
+        run: molecule test --scenario-name default
+        working-directory: "${{ github.repository }}"
+        env:
+          PY_COLORS: '1'
+          ANSIBLE_FORCE_COLOR: '1'
+          MOLECULE_DISTRO: ubuntu2204
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    name: Publish to Galaxy
+    if: github.event_name == 'release' && github.event.action == 'published'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Ansible
+        run: pip install ansible-core
+
+      - name: Publish role to Galaxy
+        run: |
+          ansible-galaxy role import --api-key ${{ secrets.GALAXY_API_KEY }} ${{ github.repository_owner }} ${{ github.event.repository.name }}
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: publish
+    if: success()
+    steps:
+      - name: Notify success
+        run: |
+          echo "✅ Role successfully published to Ansible Galaxy!"
+          echo "📦 Role: ${{ github.repository }}"
+          echo "🏷️ Version: ${{ github.ref_name }}"

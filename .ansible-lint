@@ -1,0 +1,27 @@
+---
+# Configuration for ansible-lint
+
+profile: production  # min, basic, moderate, safety, shared, production
+
+# Exclude specific paths
+exclude_paths:
+  - .cache/
+  - .github/
+  - molecule/*/venv/
+  - .tox/
+  - .pytest_cache/
+  - .venv/
+
+# Enable offline mode for better CI performance  
+offline: false
+
+# Skip specific rules if needed
+skip_list:
+  - yaml[line-length]  # Allow longer lines in some cases
+
+# Enable progressive mode for easier migration
+progressive: false
+
+# Warn instead of error for certain issues
+warn_list:
+  - experimental  # Experimental rules

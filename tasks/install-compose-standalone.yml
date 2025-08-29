@@ -1,0 +1,42 @@
+---
+# Install Docker Compose standalone binary
+
+- name: Get latest Docker Compose version
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/docker/compose/releases/latest
+    return_content: true
+  register: _docker_compose_latest
+  when: docker_compose_version == 'latest'
+
+- name: Set Docker Compose version fact
+  ansible.builtin.set_fact:
+    _docker_compose_version: >-
+      {{
+        _docker_compose_latest.json.tag_name[1:] if docker_compose_version == 'latest'
+        else docker_compose_version
+      }}
+
+- name: Check current Docker Compose version
+  ansible.builtin.command: docker-compose --version
+  register: _current_compose_version
+  failed_when: false
+  changed_when: false
+
+- name: Download Docker Compose binary
+  ansible.builtin.get_url:
+    url: "https://github.com/docker/compose/releases/download/v{{ _docker_compose_version }}/docker-compose-{{ ansible_system }}-{{ ansible_architecture }}"
+    dest: /usr/local/bin/docker-compose
+    mode: '0755'
+    owner: root
+    group: root
+    force: true
+  when: >
+    _current_compose_version.rc != 0 or
+    _docker_compose_version not in _current_compose_version.stdout
+
+- name: Create symlink for docker-compose
+  ansible.builtin.file:
+    src: /usr/local/bin/docker-compose
+    dest: /usr/bin/docker-compose
+    state: link
+    force: true

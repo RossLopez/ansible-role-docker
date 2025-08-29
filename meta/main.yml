@@ -1,18 +1,41 @@
 ---
 galaxy_info:
   author: Ross Lopez
-  role_name: docker_ubuntu
-  description: Ansible role that installs Docker and Docker Compose on Ubuntu
+  role_name: docker
+  namespace: rosslopez
+  description: Modern Ansible role that installs Docker Engine and Docker Compose on Linux distributions
   license: MIT
-  min_ansible_version: 2.1
-
+  min_ansible_version: "2.12"
+  
   platforms:
     - name: Ubuntu
       versions:
-        - all
+        - focal    # 20.04
+        - jammy    # 22.04
+        - noble    # 24.04
+    - name: Debian
+      versions:
+        - bullseye # 11
+        - bookworm # 12
+    - name: EL
+      versions:
+        - "8"
+        - "9"
+
   galaxy_tags:
     - docker
+    - containers
+    - docker-compose
     - ubuntu
-    - compose
+    - debian
+    - rhel
+    - centos
+    - system
+    - cloud
 
 dependencies: []
+
+# Collection namespace (for future migration to collections)
+collections:
+  - community.general
+  - ansible.posix

@@ -1,13 +1,31 @@
 ---
-- name: start docker service
-  service:
-    name: docker
-    state: started
+# Handlers for Docker service management
 
-- name: systemd daemon-reload
-  command: systemctl daemon-reload
-
-- name: restart docker service
-  service:
+- name: restart docker
+  ansible.builtin.systemd:
     name: docker
     state: restarted
+    daemon_reload: true
+  listen: "restart docker"
+
+- name: start docker
+  ansible.builtin.systemd:
+    name: docker
+    state: started
+    daemon_reload: true
+  listen: "start docker"
+
+- name: reload docker
+  ansible.builtin.systemd:
+    name: docker
+    state: reloaded
+    daemon_reload: true
+  listen: "reload docker"
+
+- name: warn about docker group
+  ansible.builtin.debug:
+    msg: |
+      SECURITY WARNING: Users have been added to the 'docker' group.
+      Please note that this grants root-equivalent privileges.
+      Users need to log out and back in for group changes to take effect.
+  listen: "warn about docker group"
