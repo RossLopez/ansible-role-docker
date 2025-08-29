@@ -96,7 +96,7 @@
 - name: Display Docker version
   ansible.builtin.debug:
     msg: "{{ _docker_version_output.stdout }}"
-  when: 
+  when:
     - not docker_skip_service_start
     - _docker_version_output is defined
 
@@ -104,7 +104,7 @@
   ansible.builtin.command: docker compose version
   register: _docker_compose_version_output
   changed_when: false
-  when: 
+  when:
     - docker_compose_install_method == 'plugin'
     - not docker_skip_service_start
 
@@ -112,7 +112,7 @@
   ansible.builtin.command: docker-compose --version
   register: _docker_compose_standalone_version_output
   changed_when: false
-  when: 
+  when:
     - docker_compose_install_method == 'standalone'
     - not docker_skip_service_start
 
@@ -124,6 +124,6 @@
         else _docker_compose_standalone_version_output.stdout if docker_compose_install_method == 'standalone'
         else 'Docker Compose not installed'
       }}
-  when: 
+  when:
     - docker_compose_install_method in ['plugin', 'standalone']
     - not docker_skip_service_start

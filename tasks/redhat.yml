@@ -11,7 +11,7 @@
   when: ansible_pkg_mgr == 'dnf'
 
 - name: Install prerequisite packages (YUM)
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name:
       - yum-utils
       - curl

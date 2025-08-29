@@ -6,7 +6,7 @@ galaxy_info:
   description: Modern Ansible role that installs Docker Engine and Docker Compose on Linux distributions
   license: MIT
   min_ansible_version: "2.12"
-  
+
   platforms:
     - name: Ubuntu
       versions:
@@ -25,7 +25,7 @@ galaxy_info:
   galaxy_tags:
     - docker
     - containers
-    - docker-compose
+    - compose
     - ubuntu
     - debian
     - rhel

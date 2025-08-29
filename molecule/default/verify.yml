@@ -73,7 +73,7 @@
       register: test_user_groups
       changed_when: false
       failed_when: false
-      when: 
+      when:
         - test_user_info is defined
         - test_user_info.ansible_facts is defined
         - "'testuser' in (docker_users | default([]))"
@@ -84,7 +84,7 @@
           - "'docker' in test_user_groups.stdout"
         fail_msg: "Test user is not in docker group: {{ test_user_groups.stdout }}"
         success_msg: "Test user is properly configured in docker group"
-      when: 
+      when:
         - test_user_groups is defined
         - test_user_groups.stdout is defined
         - "'testuser' in (docker_users | default([]))"

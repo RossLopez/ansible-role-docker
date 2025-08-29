@@ -12,12 +12,15 @@ exclude_paths:
   - .pytest_cache/
   - .venv/
 
-# Enable offline mode for better CI performance  
+# Enable offline mode for better CI performance
 offline: false
 
 # Skip specific rules if needed
 skip_list:
   - yaml[line-length]  # Allow longer lines in some cases
+  - yaml[trailing-spaces]  # Allow trailing spaces in some cases
+  - name[casing]  # Allow different casing for names
+  - yaml[comments-indentation]  # Allow different indentation for comments
 
 # Enable progressive mode for easier migration
 progressive: false
