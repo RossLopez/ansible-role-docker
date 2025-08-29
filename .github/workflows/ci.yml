@@ -34,8 +34,39 @@ jobs:
       - name: Lint with yamllint
         run: yamllint .
 
+  syntax:
+    runs-on: ubuntu-latest
+    name: Syntax Check
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install ansible-lint yamllint ansible-core
+          ansible-galaxy collection install community.docker --force
+          ansible-galaxy collection install community.general --force
+          ansible-galaxy collection install ansible.posix --force
+
+      - name: Run YAML lint
+        run: yamllint .
+
+      - name: Run Ansible lint
+        run: ansible-lint .
+
+      - name: Test playbook syntax
+        run: |
+          echo "localhost ansible_connection=local" > /tmp/inventory
+          ansible-playbook --syntax-check --inventory /tmp/inventory molecule/default/converge.yml
+
   molecule:
     runs-on: ubuntu-latest
+    needs: syntax
     strategy:
       matrix:
         distro:
@@ -70,8 +101,16 @@ jobs:
           docker --version
           docker system info
 
+      - name: Run syntax checks directly
+        run: |
+          yamllint .
+          ansible-lint .
+          echo "localhost ansible_connection=local" > /tmp/inventory
+          ansible-playbook --syntax-check --inventory /tmp/inventory molecule/default/converge.yml
+
       - name: Run Molecule syntax tests
         run: molecule test -s syntax-only
+        continue-on-error: true
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
