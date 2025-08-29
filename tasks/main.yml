@@ -81,6 +81,7 @@
     state: "{{ docker_service_state }}"
     enabled: "{{ docker_service_enabled }}"
     daemon_reload: true
+  when: not docker_skip_service_start
 
 - name: Add users to Docker group
   ansible.builtin.include_tasks: docker-users.yml
@@ -90,22 +91,30 @@
   ansible.builtin.command: docker --version
   register: _docker_version_output
   changed_when: false
+  when: not docker_skip_service_start
 
 - name: Display Docker version
   ansible.builtin.debug:
     msg: "{{ _docker_version_output.stdout }}"
+  when: 
+    - not docker_skip_service_start
+    - _docker_version_output is defined
 
 - name: Verify Docker Compose installation (plugin)
   ansible.builtin.command: docker compose version
   register: _docker_compose_version_output
   changed_when: false
-  when: docker_compose_install_method == 'plugin'
+  when: 
+    - docker_compose_install_method == 'plugin'
+    - not docker_skip_service_start
 
 - name: Verify Docker Compose installation (standalone)
   ansible.builtin.command: docker-compose --version
   register: _docker_compose_standalone_version_output
   changed_when: false
-  when: docker_compose_install_method == 'standalone'
+  when: 
+    - docker_compose_install_method == 'standalone'
+    - not docker_skip_service_start
 
 - name: Display Docker Compose version
   ansible.builtin.debug:
@@ -115,4 +124,6 @@
         else _docker_compose_standalone_version_output.stdout if docker_compose_install_method == 'standalone'
         else 'Docker Compose not installed'
       }}
-  when: docker_compose_install_method in ['plugin', 'standalone']
+  when: 
+    - docker_compose_install_method in ['plugin', 'standalone']
+    - not docker_skip_service_start

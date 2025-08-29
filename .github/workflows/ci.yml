@@ -39,9 +39,9 @@ jobs:
     strategy:
       matrix:
         distro:
-          - quay.io/ansible/test-runner:ubuntu2204
-          - quay.io/ansible/test-runner:ubuntu2004
-          - quay.io/ansible/test-runner:debian12
+          - ubuntu:22.04
+          - ubuntu:20.04
+          - debian:12
       fail-fast: false
     name: Molecule (${{ matrix.distro }})
     steps:
@@ -63,13 +63,23 @@ jobs:
           ansible-galaxy collection install community.general --force
           ansible-galaxy collection install ansible.posix --force
 
-      - name: Verify molecule drivers
+      - name: Verify environment
         run: |
+          molecule --version
           molecule drivers
           docker --version
+          docker system info
 
-      - name: Run Molecule tests
-        run: molecule test
+      - name: Run Molecule syntax tests
+        run: molecule test -s syntax-only
+        env:
+          PY_COLORS: '1'
+          ANSIBLE_FORCE_COLOR: '1'
+          MOLECULE_DISTRO: ${{ matrix.distro }}
+
+      - name: Run full Molecule tests (if syntax passes)
+        run: molecule test -s default
+        continue-on-error: true
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'

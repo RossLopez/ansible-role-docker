@@ -55,3 +55,6 @@ docker_tls_enabled: false
 
 # Rootless Docker configuration
 docker_rootless: false
+
+# Testing configuration - skip service operations for CI testing
+docker_skip_service_start: false
