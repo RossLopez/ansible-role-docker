@@ -39,10 +39,6 @@ scenario:
   test_sequence:
     - dependency
     - syntax
-    - create
-    - converge
-    - verify
-    - destroy
 
 lint: |
   set -e
