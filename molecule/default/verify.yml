@@ -1,14 +1,15 @@
+---
 - name: Verify Docker Role
   hosts: all
   tasks:
     - name: Verify Docker binary is available
-      command: docker version
+      ansible.builtin.command: docker version
       register: docker_version_result
       changed_when: false
       failed_when: docker_version_result.rc != 0
 
     - name: Show Docker version details
-      debug:
+      ansible.builtin.debug:
         msg: >
           Docker Version Output:
           {{ docker_version_result.stdout }}
