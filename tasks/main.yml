@@ -34,9 +34,9 @@
   when: ansible_os_family not in ['Debian', 'RedHat']
 
 - name: Check if Docker is already installed
-  ansible.builtin.command: docker --version
+  ansible.builtin.stat:
+    path: /usr/bin/docker
   register: _docker_installed
-  failed_when: false
   changed_when: false
 
 - name: Include OS family specific tasks

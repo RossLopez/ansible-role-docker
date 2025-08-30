@@ -35,7 +35,6 @@ galaxy_info:
 
 dependencies: []
 
-# Collection namespace (for future migration to collections)
 collections:
   - community.general
   - ansible.posix

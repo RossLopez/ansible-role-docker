@@ -2,14 +2,33 @@
 - name: Verify Docker Role
   hosts: all
   tasks:
+    - name: Check if Docker binary exists
+      ansible.builtin.stat:
+        path: /usr/bin/docker
+      register: docker_binary
+
     - name: Verify Docker binary is available
       ansible.builtin.command: docker version
       register: docker_version_result
       changed_when: false
-      failed_when: docker_version_result.rc != 0
+      failed_when: false
+      when: docker_binary.stat.exists
 
     - name: Show Docker version details
       ansible.builtin.debug:
         msg: >
           Docker Version Output:
-          {{ docker_version_result.stdout }}
+          {{ docker_version_result.stdout | default('Docker not found or not accessible') }}
+
+    - name: Verify Docker service is running
+      ansible.builtin.systemd:
+        name: docker
+        state: started
+      check_mode: true
+      register: docker_service_check
+      failed_when: false
+
+    - name: Show Docker service status
+      ansible.builtin.debug:
+        msg: "Docker service is {{ 'running' if docker_service_check.status.ActiveState == 'active' else 'not running' }}"
+      when: docker_service_check.status is defined

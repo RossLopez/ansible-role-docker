@@ -33,7 +33,7 @@
       - podman
       - runc
     state: absent
-  when: _docker_installed.rc != 0
+  when: not _docker_installed.stat.exists
 
 - name: Import Docker GPG key
   ansible.builtin.rpm_key:
