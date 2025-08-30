@@ -7,9 +7,9 @@ on:
   schedule:
     - cron: "0 7 * * 0"
 
-#defaults:
-#  run:
-#    working-directory: 'RossLopez.docker'
+defaults:
+  run:
+    working-directory: "RossLopez/ansible-role-docker" 
 
 jobs:
   lint:
