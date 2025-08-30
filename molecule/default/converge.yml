@@ -10,7 +10,7 @@
       when: ansible_facts.os_family == 'Debian'
 
     - name: Ensure Python 3 is installed
-      ansible.builtin.apt:
+      ansible.builtin.package:
         name: python3
         state: present
 
