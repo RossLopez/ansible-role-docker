@@ -9,7 +9,7 @@ on:
 
 defaults:
   run:
-    working-directory: 'RossLopez.docker'
+    working-directory: 'geerlingguy.docker'
 
 jobs:
   lint:
@@ -19,7 +19,7 @@ jobs:
       - name: Check out the codebase.
         uses: actions/checkout@v4
         with:
-          path: 'RossLopez.docker'
+          path: 'geerlingguy.docker'
 
       - name: Set up Python 3.
         uses: actions/setup-python@v5
@@ -44,7 +44,7 @@ jobs:
       - name: Check out the codebase.
         uses: actions/checkout@v4
         with:
-          path: 'RossLopez.docker'
+          path: 'geerlingguy.docker'
 
       - name: Set up Python 3.
         uses: actions/setup-python@v5
