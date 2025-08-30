@@ -1,6 +1,10 @@
 # Ansible Role: Docker
 
 [![CI](https://github.com/rosslopez/ansible-role-docker/workflows/CI/badge.svg)](https://github.com/rosslopez/ansible-role-docker/actions)
+[![GitHub issues](https://img.shields.io/github/issues/rosslopez/ansible-role-docker)](https://github.com/rosslopez/ansible-role-docker/issues)
+[![GitHub stars](https://img.shields.io/github/stars/rosslopez/ansible-role-docker)](https://github.com/rosslopez/ansible-role-docker/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/rosslopez/ansible-role-docker)](https://github.com/rosslopez/ansible-role-docker/network)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/rosslopez/ansible-role-docker/graphs/commit-activity)
 
 Modern Ansible role that installs [Docker Engine](https://www.docker.com) and Docker Compose on Linux distributions including Ubuntu, Debian, and RHEL/CentOS. 
 ## Requirements
