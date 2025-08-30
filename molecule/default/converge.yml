@@ -1,0 +1,25 @@
+- name: Converge
+  hosts: all
+
+  pre_tasks:
+    - name: Update apt cache.
+      apt:
+        update_cache: yes
+        cache_valid_time: 600
+      when: ansible_facts.os_family == 'Debian'
+
+    - name: Wait for systemd to complete initialization.  # noqa 303
+      command: systemctl is-system-running
+      register: systemctl_status
+      until: >
+        'stopped' not in systemctl_status.stdout and
+        'starting' not in systemctl_status.stdout and
+        'initializing' not in systemctl_status.stdout and
+        'degraded' not in systemctl_status.stdout
+      retries: 30
+      delay: 1
+      failed_when: false
+      changed_when: false
+
+  roles:
+    - role: RossLopez.docker
