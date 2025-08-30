@@ -21,4 +21,4 @@
       changed_when: false
 
   roles:
-    - role: ansible-role-docker
+    - role: rosslopez.docker
