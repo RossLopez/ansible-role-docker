@@ -21,4 +21,4 @@
       changed_when: false
 
   roles:
-    - role: ../../ # RossLopez.docker
+    - role: "ansible-role-docker"
