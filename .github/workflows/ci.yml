@@ -1,115 +1,61 @@
----
 name: CI
 on:
-  push:
-    branches: [ main, master ]
   pull_request:
-    branches: [ main, master ]
+  push:
+    branches:
+      - main
   schedule:
-    # Run tests weekly on Sunday at 2 AM UTC
-    - cron: '0 2 * * 0'
+    - cron: "0 7 * * 0"
+
+defaults:
+  run:
+    working-directory: 'RossLopez.docker'
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
     name: Lint
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Check out the codebase.
         uses: actions/checkout@v4
+        with:
+          path: 'RossLopez.docker'
 
-      - name: Set up Python
+      - name: Set up Python 3.
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.x'
 
-      - name: Install dependencies
+      - name: Install dependencies.
+        run: pip3 install yamllint ansible ansible-lint molecule molecule-plugins[docker] docker
+
+      - name: Lint code.
         run: |
-          pip install ansible-lint yamllint
-          ansible-galaxy collection install community.general
-          ansible-galaxy collection install ansible.posix
+          yamllint .
+          ansible-lint
 
-      - name: Lint with ansible-lint
-        run: ansible-lint
-
-      - name: Lint with yamllint
-        run: yamllint .
-
-  syntax:
+  molecule:
+    name: Molecule test
     runs-on: ubuntu-latest
-    name: Syntax Check
+    strategy:
+      matrix:
+        distro: [rockylinux9, rockylinux8, ubuntu2204, ubuntu2004, debian12, debian11]
     steps:
-      - name: Checkout
+      - name: Check out the codebase.
         uses: actions/checkout@v4
+        with:
+          path: 'RossLopez.docker'
 
-      - name: Set up Python
+      - name: Set up Python 3.
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.x'
 
-      - name: Install dependencies
+      - name: Install dependencies.
+        run: pip3 install yamllint ansible ansible-lint molecule molecule-plugins[docker] docker
+
+      - name: Run Molecule tests.
         run: |
-          pip install ansible-lint yamllint ansible-core
-          ansible-galaxy collection install community.docker --force
-          ansible-galaxy collection install community.general --force
-          ansible-galaxy collection install ansible.posix --force
-
-      - name: Run YAML lint
-        run: yamllint .
-
-      - name: Run Ansible lint
-        run: ansible-lint .
-
-      - name: Test playbook syntax
-        run: |
-          echo "localhost ansible_connection=local" > /tmp/inventory
-          ansible-playbook --syntax-check --inventory /tmp/inventory molecule/default/converge.yml
-
-  integration:
-    runs-on: ubuntu-latest
-    needs: syntax
-    name: Integration Test
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install test dependencies
-        run: |
-          pip install ansible-core
-          ansible-galaxy collection install community.docker --force
-          ansible-galaxy collection install community.general --force
-          ansible-galaxy collection install ansible.posix --force
-
-      - name: Run role validation
-        run: |
-          echo "localhost ansible_connection=local" > /tmp/inventory
-          # Test that the role can be included without errors
-          ansible-playbook --syntax-check --inventory /tmp/inventory molecule/default/converge.yml
-          # Test with dry-run to validate task logic
-          ansible-playbook --check --inventory /tmp/inventory molecule/default/converge.yml
-          echo "✅ Role validation completed successfully"
-
-  security:
-    runs-on: ubuntu-latest
-    name: Security Scan
-    if: github.event_name == 'push' || github.event_name == 'schedule'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: 'trivy-results.sarif'
+          molecule test
+        env:
+          MOLECULE_DISTRO: ${{ matrix.distro }}

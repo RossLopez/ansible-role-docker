@@ -1,0 +1,33 @@
+name: Release
+on:
+  push:
+    tags:
+      - '*'
+
+defaults:
+  run:
+    working-directory: 'RossLopez.docker'
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the codebase.
+        uses: actions/checkout@v4
+        with:
+          path: 'RossLopez.docker'
+
+      - name: Set up Python 3.
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Ansible Galaxy CLI.
+        run: pip3 install ansible
+
+      - name: Import role into Ansible Galaxy.
+        env:
+          GALAXY_API_KEY: ${{ secrets.GALAXY_API_KEY }}
+        run: |
+          ansible-galaxy role import --api-key $GALAXY_API_KEY RossLopez ansible-role-docker

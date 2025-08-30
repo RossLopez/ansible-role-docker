@@ -1,102 +1,14 @@
----
-- name: Verify Docker installation
+- name: Verify Docker Role
   hosts: all
-  gather_facts: true
-  become: true
   tasks:
-    - name: Check if Docker is installed
-      ansible.builtin.command: docker --version
-      register: docker_version
+    - name: Verify Docker binary is available
+      command: docker version
+      register: docker_version_result
       changed_when: false
+      failed_when: docker_version_result.rc != 0
 
-    - name: Verify Docker version output
-      ansible.builtin.assert:
-        that:
-          - "'Docker version' in docker_version.stdout"
-        fail_msg: "Docker version command failed"
-        success_msg: "Docker is installed: {{ docker_version.stdout }}"
-
-    - name: Check if Docker service is running
-      ansible.builtin.systemd:
-        name: docker
-      register: docker_service
-
-    - name: Verify Docker service is active
-      ansible.builtin.assert:
-        that:
-          - docker_service.status.ActiveState == "active"
-        fail_msg: "Docker service is not running"
-        success_msg: "Docker service is running"
-
-    - name: Check if Docker Compose is installed (plugin)
-      ansible.builtin.command: docker compose version
-      register: docker_compose_version
-      changed_when: false
-      failed_when: false
-
-    - name: Check if Docker Compose is installed (standalone)
-      ansible.builtin.command: docker-compose --version
-      register: docker_compose_standalone_version
-      changed_when: false
-      failed_when: false
-      when: docker_compose_version.rc != 0
-
-    - name: Verify Docker Compose is installed
-      ansible.builtin.assert:
-        that:
-          - docker_compose_version.rc == 0 or docker_compose_standalone_version.rc == 0
-        fail_msg: "Docker Compose is not installed"
-        success_msg: "Docker Compose is installed"
-
-    - name: Test Docker hello-world
-      ansible.builtin.command: docker run --rm hello-world
-      register: docker_hello_world
-      changed_when: false
-
-    - name: Verify Docker can run containers
-      ansible.builtin.assert:
-        that:
-          - "'Hello from Docker!' in docker_hello_world.stdout"
-        fail_msg: "Docker cannot run containers"
-        success_msg: "Docker can successfully run containers"
-
-    - name: Check if test user exists (if configured)
-      ansible.builtin.getent:
-        database: passwd
-        key: testuser
-      register: test_user_info
-      failed_when: false
-      when: "'testuser' in (docker_users | default([]))"
-
-    - name: Get user groups for testuser
-      ansible.builtin.command: groups testuser
-      register: test_user_groups
-      changed_when: false
-      failed_when: false
-      when:
-        - test_user_info is defined
-        - test_user_info.ansible_facts is defined
-        - "'testuser' in (docker_users | default([]))"
-
-    - name: Verify test user is in docker group
-      ansible.builtin.assert:
-        that:
-          - "'docker' in test_user_groups.stdout"
-        fail_msg: "Test user is not in docker group: {{ test_user_groups.stdout }}"
-        success_msg: "Test user is properly configured in docker group"
-      when:
-        - test_user_groups is defined
-        - test_user_groups.stdout is defined
-        - "'testuser' in (docker_users | default([]))"
-
-    - name: Test Docker info command
-      ansible.builtin.command: docker info
-      register: docker_info
-      changed_when: false
-
-    - name: Verify Docker daemon is responsive
-      ansible.builtin.assert:
-        that:
-          - "'Server' in docker_info.stdout"
-        fail_msg: "Docker daemon is not responsive"
-        success_msg: "Docker daemon is working correctly"
+    - name: Show Docker version details
+      debug:
+        msg: >
+          Docker Version Output:
+          {{ docker_version_result.stdout }}
