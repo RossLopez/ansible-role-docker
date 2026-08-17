@@ -30,5 +30,10 @@
 
     - name: Show Docker service status
       ansible.builtin.debug:
-        msg: "Docker service is {{ 'running' if docker_service_check.status.ActiveState == 'active' else 'not running' }}"
+        msg: >-
+          Docker service is {{
+            'running'
+            if docker_service_check.status.ActiveState == 'active'
+            else 'not running'
+          }}
       when: docker_service_check.status is defined

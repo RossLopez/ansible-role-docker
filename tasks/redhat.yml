@@ -5,19 +5,17 @@
   ansible.builtin.dnf:
     name:
       - dnf-plugins-core
-      - curl
       - ca-certificates
     state: present
-  when: ansible_pkg_mgr == 'dnf'
+  when: ansible_facts['pkg_mgr'] == 'dnf'
 
 - name: Install prerequisite packages (YUM)
   ansible.builtin.dnf:
     name:
       - yum-utils
-      - curl
       - ca-certificates
     state: present
-  when: ansible_pkg_mgr == 'yum'
+  when: ansible_facts['pkg_mgr'] == 'yum'
 
 - name: Remove old Docker packages if present
   ansible.builtin.package:
@@ -42,9 +40,15 @@
 
 - name: Add Docker repository
   ansible.builtin.yum_repository:
-    name: docker-ce-stable
-    description: "Docker CE Stable - {{ ansible_architecture }}"
-    baseurl: "{{ _docker_repo_url }}/{{ ansible_distribution_major_version }}/{{ ansible_architecture }}/stable"
+    name: "docker-ce-{{ docker_release_channel }}"
+    description: "Docker CE {{ docker_release_channel | capitalize }} - {{ ansible_facts['architecture'] }}"
+    baseurl: >-
+      {{
+        _docker_repo_url
+        ~ '/' ~ ansible_facts['distribution_major_version']
+        ~ '/' ~ ansible_facts['architecture']
+        ~ '/' ~ docker_release_channel
+      }}
     gpgcheck: true
     gpgkey: "{{ _docker_gpg_key_url }}"
     enabled: true

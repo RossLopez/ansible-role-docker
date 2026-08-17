@@ -2,8 +2,8 @@
 # OS-specific variables
 
 # Debian/Ubuntu specific variables
-_docker_repo_url_debian: "https://download.docker.com/linux/{{ ansible_distribution | lower }}"
-_docker_gpg_key_url_debian: "https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg"
+_docker_repo_url_debian: "https://download.docker.com/linux/{{ ansible_facts['distribution'] | lower }}"
+_docker_gpg_key_url_debian: "https://download.docker.com/linux/{{ ansible_facts['distribution'] | lower }}/gpg"
 _docker_gpg_key_id_debian: "9DC858229FC7DD38854AE2D88D81803C0EBFCD88"
 
 _docker_packages_debian:
@@ -14,9 +14,11 @@ _docker_packages_debian:
 
 _docker_compose_package_debian: docker-compose-plugin
 
-# RedHat/CentOS specific variables
-_docker_repo_url_redhat: "https://download.docker.com/linux/centos"
-_docker_gpg_key_url_redhat: "https://download.docker.com/linux/centos/gpg"
+# RHEL and Red Hat-compatible distribution variables
+_docker_repo_url_rhel: "https://download.docker.com/linux/rhel"
+_docker_gpg_key_url_rhel: "https://download.docker.com/linux/rhel/gpg"
+_docker_repo_url_centos: "https://download.docker.com/linux/centos"
+_docker_gpg_key_url_centos: "https://download.docker.com/linux/centos/gpg"
 _docker_gpg_key_id_redhat: "060A61C51B558A7F742B77AAC52FEB6B621E9F35"
 
 _docker_packages_redhat:
@@ -32,10 +34,16 @@ _docker_arch_mapping:
   x86_64: amd64
   aarch64: arm64
   armv7l: armhf
+  ppc64le: ppc64el
 
 # Docker daemon defaults
 _docker_daemon_config_file: /etc/docker/daemon.json
 _docker_service_name: docker
 
 # URL for Docker Compose standalone installation
-_docker_compose_standalone_url: "https://github.com/docker/compose/releases/download/v{{ docker_compose_version }}/docker-compose-{{ ansible_system }}-{{ ansible_architecture }}"
+_docker_compose_standalone_url: >-
+  {{
+    'https://github.com/docker/compose/releases/download/v' ~ docker_compose_version
+    ~ '/docker-compose-' ~ ansible_facts['system']
+    ~ '-' ~ ansible_facts['architecture']
+  }}

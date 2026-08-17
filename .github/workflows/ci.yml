@@ -1,15 +1,15 @@
 name: CI
+
 on:
   pull_request:
   push:
     branches:
       - main
   schedule:
-    - cron: "0 14 * * *"
+    - cron: "0 14 * * 0"
 
-defaults:
-  run:
-    working-directory: "RossLopez/ansible-role-docker" 
+permissions:
+  contents: read
 
 jobs:
   lint:
@@ -17,14 +17,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the codebase.
-        uses: actions/checkout@v4
-        with:
-          path: "${{ github.repository }}"
+        uses: actions/checkout@v6
 
       - name: Set up Python 3.
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
-          python-version: '3.x'
+          python-version: '3.12'
 
       - name: Install dependencies.
         run: pip3 install yamllint ansible ansible-lint molecule molecule-plugins[docker] docker
@@ -38,21 +36,50 @@ jobs:
     name: Molecule test
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        distro: [rockylinux9, rockylinux8, ubuntu2204, ubuntu2404, debian12, debian11]
+        include:
+          - distro: ubuntu2204
+            ansible_core: "~=2.21.0"
+          - distro: ubuntu2404
+            ansible_core: "~=2.21.0"
+          - distro: ubuntu2604
+            ansible_core: "~=2.21.0"
+          - distro: debian11
+            ansible_core: "~=2.21.0"
+          - distro: debian12
+            ansible_core: "~=2.21.0"
+          - distro: debian13
+            ansible_core: "~=2.21.0"
+          - distro: rockylinux8
+            ansible_core: "~=2.16.0"
+            community_docker_constraint: "<5"
+          - distro: rockylinux9
+            ansible_core: "~=2.21.0"
+          - distro: rockylinux10
+            ansible_core: "~=2.21.0"
     steps:
       - name: Check out the codebase.
-        uses: actions/checkout@v4
-        with:
-          path: "${{ github.repository }}"
+        uses: actions/checkout@v6
 
       - name: Set up Python 3.
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
-          python-version: '3.x'
+          python-version: '3.12'
 
       - name: Install dependencies.
-        run: pip3 install yamllint ansible ansible-lint molecule molecule-plugins[docker] docker
+        run: >-
+          pip3 install
+          "ansible-core${{ matrix.ansible_core }}"
+          molecule
+          molecule-plugins[docker]
+          docker
+
+      - name: Install Molecule test collections.
+        run: >-
+          ansible-galaxy collection install
+          "community.docker${{ matrix.community_docker_constraint }}"
+          ansible.posix
 
       - name: Run Molecule tests.
         run: |

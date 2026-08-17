@@ -11,10 +11,10 @@ Modern Ansible role that installs [Docker Engine](https://www.docker.com) and Do
 
 - Ansible 2.12 or higher
 - Supported OS:
-  - Ubuntu 20.04, 22.04, 24.04
-  - Debian 11, 12
-  - RHEL/CentOS 8, 9
-  - Rocky Linux 8, 9
+  - Ubuntu 22.04, 24.04, 26.04
+  - Debian 11, 12, 13
+  - RHEL/CentOS 8, 9, 10
+  - Rocky Linux 8, 9, 10
 
 ## Role Variables
 
@@ -139,11 +139,7 @@ docker_storage_driver: ""                  # Leave empty for default
 
 ## Dependencies
 
-This role requires the following Ansible collections:
-- `community.general`
-- `ansible.posix`
-
-These will be automatically installed when using this role via Ansible Galaxy.
+None. This role uses modules included with `ansible-core`.
 
 ## License
 

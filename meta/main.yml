@@ -10,17 +10,19 @@ galaxy_info:
   platforms:
     - name: Ubuntu
       versions:
-        - focal    # 20.04
         - jammy    # 22.04
         - noble    # 24.04
+        - resolute # 26.04
     - name: Debian
       versions:
         - bullseye # 11
         - bookworm # 12
+        - trixie   # 13
     - name: EL
       versions:
         - "8"
         - "9"
+        - "10"
 
   galaxy_tags:
     - docker
@@ -34,7 +36,3 @@ galaxy_info:
     - cloud
 
 dependencies: []
-
-collections:
-  - community.general
-  - ansible.posix

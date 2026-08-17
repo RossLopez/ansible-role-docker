@@ -5,33 +5,38 @@
   ansible.builtin.set_fact:
     _docker_repo_url: >-
       {{
-        _docker_repo_url_debian if ansible_os_family == 'Debian'
-        else _docker_repo_url_redhat if ansible_os_family == 'RedHat'
+        docker_repo_url if docker_repo_url | length > 0
+        else _docker_repo_url_debian if ansible_facts['os_family'] == 'Debian'
+        else _docker_repo_url_rhel if ansible_facts['distribution'] == 'RedHat'
+        else _docker_repo_url_centos if ansible_facts['os_family'] == 'RedHat'
         else docker_repo_url
       }}
     _docker_gpg_key_url: >-
       {{
-        _docker_gpg_key_url_debian if ansible_os_family == 'Debian'
-        else _docker_gpg_key_url_redhat if ansible_os_family == 'RedHat'
+        docker_gpg_key_url if docker_gpg_key_url | length > 0
+        else _docker_gpg_key_url_debian if ansible_facts['os_family'] == 'Debian'
+        else _docker_gpg_key_url_rhel if ansible_facts['distribution'] == 'RedHat'
+        else _docker_gpg_key_url_centos if ansible_facts['os_family'] == 'RedHat'
         else docker_gpg_key_url
       }}
     _docker_gpg_key_id: >-
       {{
-        _docker_gpg_key_id_debian if ansible_os_family == 'Debian'
-        else _docker_gpg_key_id_redhat if ansible_os_family == 'RedHat'
+        docker_gpg_key_id if docker_gpg_key_id | length > 0
+        else _docker_gpg_key_id_debian if ansible_facts['os_family'] == 'Debian'
+        else _docker_gpg_key_id_redhat if ansible_facts['os_family'] == 'RedHat'
         else docker_gpg_key_id
       }}
     _docker_packages: >-
       {{
-        _docker_packages_debian if ansible_os_family == 'Debian'
-        else _docker_packages_redhat if ansible_os_family == 'RedHat'
+        _docker_packages_debian if ansible_facts['os_family'] == 'Debian'
+        else _docker_packages_redhat if ansible_facts['os_family'] == 'RedHat'
         else []
       }}
 
 - name: Validate supported operating system
   ansible.builtin.fail:
     msg: "This role currently supports Debian, Ubuntu, and RedHat-based distributions only."
-  when: ansible_os_family not in ['Debian', 'RedHat']
+  when: ansible_facts['os_family'] not in ['Debian', 'RedHat']
 
 - name: Check if Docker is already installed
   ansible.builtin.stat:
@@ -40,7 +45,7 @@
   changed_when: false
 
 - name: Include OS family specific tasks
-  ansible.builtin.include_tasks: "{{ ansible_os_family | lower }}.yml"
+  ansible.builtin.include_tasks: "{{ ansible_facts['os_family'] | lower }}.yml"
 
 - name: Install Docker packages
   ansible.builtin.package:
@@ -51,7 +56,12 @@
 
 - name: Install Docker Compose plugin
   ansible.builtin.package:
-    name: "{{ _docker_compose_package_debian if ansible_os_family == 'Debian' else _docker_compose_package_redhat }}"
+    name: >-
+      {{
+        _docker_compose_package_debian
+        if ansible_facts['os_family'] == 'Debian'
+        else _docker_compose_package_redhat
+      }}
     state: "{{ docker_package_state }}"
   when: docker_compose_install_method == 'plugin'
 
