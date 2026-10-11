@@ -15,7 +15,6 @@ galaxy_info:
         - resolute # 26.04
     - name: Debian
       versions:
-        - bullseye # 11
         - bookworm # 12
         - trixie   # 13
     - name: EL
