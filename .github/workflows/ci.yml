@@ -45,8 +45,6 @@ jobs:
             ansible_core: "~=2.21.0"
           - distro: ubuntu2604
             ansible_core: "~=2.21.0"
-          - distro: debian11
-            ansible_core: "~=2.21.0"
           - distro: debian12
             ansible_core: "~=2.21.0"
           - distro: debian13
